@@ -1,0 +1,55 @@
+version: "3"
+services:
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    container_name: nginx
+    ports:
+      - "80:80"
+    expose:
+      - "80"
+
+    depends_on: 
+      - backend-resource
+      - backend-auth
+      - frontend
+
+  frontend:
+    environment: 
+      - VUE_APP_RESOURCE_URL = your_url
+      - VUE_APP_AUTH_URL = your_url
+      - VUE_APP_NODE_ENV = production
+    build:
+      dockerfile: Dockerfile
+      context: ./frontend
+    container_name: frontend
+
+  backend-auth:
+    build:
+      dockerfile: Dockerfile
+      context: ./backend-auth
+    container_name: backend-auth
+    depends_on: 
+      - mongo-auth
+  
+  mongo-auth:
+    build:
+      dockerfile: Dockerfile
+      context: ./mongo-auth
+    container_name: mongo-auth
+
+  backend-resource:
+    build:
+      dockerfile: Dockerfile
+      context: ./backend-resource
+    container_name: backend-resource
+    depends_on: 
+      - mongo-resource
+  
+  mongo-resource:
+    build:
+      dockerfile: Dockerfile
+      context: ./mongo-resource
+    container_name: mongo-resource
