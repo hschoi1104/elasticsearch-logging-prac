@@ -1,15 +1,16 @@
 import { Client } from '@elastic/elasticsearch';
+import { logger } from 'express-winston';
 
 const client = new Client({
   node: 'http://localhost:9200',
 });
 
 export class ElasticSearch {
-  static async RequestPut(bodyData) {
+  static async requestPut(bodyData) {
     try {
       await client.index(bodyData);
     } catch (err) {
-      console.log();
+      logger.error(err.message);
     }
   }
 }

@@ -1,45 +1,41 @@
+import { logger } from 'express-winston';
 import { ElasticSearch } from './../util/elasticsearch';
 
-// export type ElasticSearchAPILogType = {
-//   apiName: string,
-//   method: string,
-//   url: string,
-//   header: Object,
-//   errorMessage?: string,
-// };
-
 export class LoggingService {
-  static async putAPILog(req) {
+  static async api(req) {
     try {
-      console.log(req);
+      const { originalUrl, headers, method } = req;
       const bodyData = {
-        index: 'server_api_logs',
+        index: 'auth-api-log',
         body: {
-          ...req,
+          method,
+          originalUrl,
+          headers,
           timestamp: new Date(),
         },
       };
-      await ElasticSearch.RequestPut(bodyData);
+      await ElasticSearch.requestPut(bodyData);
     } catch (err) {
-      console.log('fail');
+      logger.error(err.message);
     }
   }
 
-  static async putErrorLog(err, req) {
+  static async error(err, req) {
     try {
-      const { url, method } = req;
+      const { originalUrl, method, headers } = req;
       const bodyData = {
-        index: 'server_error_logs',
+        index: 'auth-error-log',
         body: {
-          url,
+          originalUrl,
           method,
+          headers,
           ...err,
           timestamp: new Date(),
         },
       };
-      await ElasticSearch.RequestPut(bodyData);
+      await ElasticSearch.requestPut(bodyData);
     } catch (err) {
-      console.log('fail');
+      logger.error(err.message);
     }
   }
 }
